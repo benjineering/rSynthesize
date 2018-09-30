@@ -4,11 +4,11 @@
 
 Example:
 
-    s = Synthesize.new(440, 1, 1) # 440 Hz, Max Amplitude, 1 Second
-    s.square
+    g = Synthesize::Generator.new(440, 1, 1) # 440 Hz, Max Amplitude, 1 Second
+    g.square
 
     f = File.new("square.wav", "w")
-    f.write(s.to_wav)
+    f.write(g.to_wav)
     f.close
 
 Thanks to Damien Karras for the algorithms!

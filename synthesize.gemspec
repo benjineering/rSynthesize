@@ -2,14 +2,14 @@
 
 Gem::Specification.new do |s|
   s.name = %q{synthesize}
-  s.version = "1.1.1"
+  s.version = "2.0.0"
 
-  s.authors = ["James Whayman"]
+  s.authors = ["James Whayman", "Ben Williams"]
   s.date = %q{2018-09-30}
   s.description = %q{Produces basic waveforms, sine, square, sawtooth, triangle. White noise and silence included free!}
-  s.email = ["whayman.jw@gmail.com"]
+  s.email = ["whayman.jw@gmail.com", "8enwilliams@gmail.com"]
   s.extra_rdoc_files = ["CHANGELOG", "LICENSE", "README.md", "lib/synthesize.rb"]
-  s.files = ["CHANGELOG", "LICENSE", "Manifest", "README.md", "Rakefile", "lib/synthesize.rb", "synthesize.gemspec"]
+  s.files = ["CHANGELOG", "LICENSE", "Manifest", "README.md", "Rakefile", "lib/**", "synthesize.gemspec"]
   s.homepage = %q{https://github.com/jwhayman/rSynthesize}
   s.post_install_message = %q{`'~,.,~'`'~,.,~'`'~,.,~'`'~,.,~'}
   s.require_paths = ["lib"]
@@ -24,4 +24,5 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "bundler", "~> 1.16"
   s.add_development_dependency "rake", "~> 10.0"
+  s.add_development_dependency "rspec"
 end
