@@ -32,9 +32,9 @@ module Synthesize
       items =
       if looped_pos > 0
         @pos = looped_pos
-        self[start..length] + self[0..(looped_pos - 1)]
+        self[start..length] + self[0...looped_pos]
       else
-        self[start..(@pos - 1)]
+        self[start...@pos]
       end
 
       items.length > 1 ? items : items.first

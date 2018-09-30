@@ -1,109 +1,120 @@
 require 'synthesize/wave_table'
 
 module Synthesize
-  class Generator    
-    attr_accessor :waveform, :frequency, :amplitude, :duration, :channels, :sample_rate, :bits_per_sample
+  class Generator
+    TWO_PI = 2 * Math::PI
+
+    attr_accessor :wave_table, :frequency, :amplitude, :duration, :channels, :sample_rate, :bits_per_sample
     
-    def initialize(frequency, amplitude, duration)
+    # Generates a single cycle if duration is nil
+    def initialize(frequency, amplitude, duration = nil)
       @frequency = frequency
       @amplitude = amplitude
       @duration = duration
       @channels = 2
       @sample_rate = 44100
-      @bits_per_sample = 16
-    end
-    
-    def sin
-      step = (2 * Math::PI * @frequency).fdiv(@sample_rate)
-      phase = 0
-      @waveform = Array.new(@duration * @sample_rate)
-      @waveform.each_index do |i|
-        @waveform[i] = @amplitude * Math.sin(phase)
-        
-        phase = phase + step
-        if phase > (2 * Math::PI)
-          phase = phase - (2 * Math::PI)
-        end
+      @bits_per_sample = 16 # TODO: handle this
+
+      @sample_count = 
+      if @duration.nil?
+        @sample_rate / @frequency
+      else
+        @duration * @sample_rate
       end
     end
+    
+    def sine
+      phase = 0
+      step = (TWO_PI * @frequency).fdiv(@sample_rate)
+      @wave_table = Array.new(@sample_count)
+
+      @wave_table.each_index do |i|
+        @wave_table[i] = @amplitude * Math.sin(phase)        
+        phase = phase + step
+        phase = phase - TWO_PI if phase > TWO_PI
+      end
+
+      @wave_table
+    end
+
+    alias_method :sin, :sine
     
     def square
-      step = (2 * Math::PI * @frequency).fdiv(@sample_rate)
       phase = 0
-      @waveform = Array.new(@duration * @sample_rate)
-      @waveform.each_index do |i|
-        if phase < Math::PI
-          @waveform[i] = @amplitude
-        else
-          @waveform[i] = -@amplitude
-        end
-        
+      step = (TWO_PI * @frequency).fdiv(@sample_rate)
+      @wave_table = Array.new(@sample_count)
+
+      @wave_table.each_index do |i|
+        @wave_table[i] = phase < Math::PI ? @amplitude : -@amplitude        
         phase = phase + step
-        if phase > (2 * Math::PI)
-          phase = phase - (2 * Math::PI)
-        end
+        phase = phase - (TWO_PI) if phase > (TWO_PI)
       end
+
+      @wave_table
     end
     
     def sawtooth
-      step = (2 * Math::PI * @frequency).fdiv(@sample_rate)
       phase = 0
-      @waveform = Array.new(@duration * @sample_rate)
-      @waveform.each_index do |i|
-        @waveform[i] = @amplitude - (@amplitude.fdiv(Math::PI)) * phase
-        
+      step = (TWO_PI * @frequency).fdiv(@sample_rate)
+      @wave_table = Array.new(@sample_count)
+
+      @wave_table.each_index do |i|
+        @wave_table[i] = @amplitude - (@amplitude.fdiv(Math::PI)) * phase        
         phase = phase + step
-        if phase > (2 * Math::PI)
-          phase = phase - (2 * Math::PI)
-        end
+        phase = phase - (TWO_PI) if phase > (TWO_PI)
       end
+
+      @wave_table
     end
     
     def triangle
-      step = (2 * Math::PI * @frequency).fdiv(@sample_rate)
       phase = 0
-      @waveform = Array.new(@duration * @sample_rate)
-      @waveform.each_index do |i|
+      step = (TWO_PI * @frequency).fdiv(@sample_rate)
+      @wave_table = Array.new(@sample_count)
+
+      @wave_table.each_index do |i|
         if phase < Math::PI
-          @waveform[i] = -@amplitude + (2 * @amplitude.fdiv(Math::PI)) * phase
+          @wave_table[i] = -@amplitude + (2 * @amplitude.fdiv(Math::PI)) * phase
         else
-          @waveform[i] = 3 * @amplitude - (2 * @amplitude.fdiv(Math::PI)) * phase
+          @wave_table[i] = 3 * @amplitude - (2 * @amplitude.fdiv(Math::PI)) * phase
         end
         
         phase = phase + step
-        if phase > (2 * Math::PI)
-          phase = phase - (2 * Math::PI)
-        end
+        phase = phase - (TWO_PI) if phase > (TWO_PI)
       end
+
+      @wave_table
     end
     
     def noise
-      @waveform = Array.new(@duration * @sample_rate)
-      @waveform.each_index do |i|
-        waveform[i] = rand(2) - 1
+      raise 'Duration required' if duration.nil? # TODO: fix
+      @wave_table = Array.new(@duration * @sample_rate)
+      @wave_table.each_index do |i|
+        wave_table[i] = rand(2) - 1
       end
+
+      @wave_table
     end
     
     def silence
-      @waveform = Array.new(@duration * @sample_rate)
-      @waveform.each_index do |i|
-        waveform[i] = 0
+      @wave_table = Array.new(@sample_count)
+      @wave_table.each_index do |i|
+        wave_table[i] = 0
       end
+
+      @wave_table
     end
     
     def to_wav
-      waveform = Array.new
+      wave_table = Array.new
       
-      @waveform.each do |w|
+      @wave_table.each do |w|
         value = w * ((2**@bits_per_sample) / 2)
-        if value > 0
-          value = value - 1
-        elsif value < 0
-          value = value + 1
-        end
+        value = value > 0 ? value - 1 : value + 1
+
         @channels.times do |c|
-        waveform.push(value)
-      end
+          wave_table.push(value)
+        end
       end
       
       block_align = (@bits_per_sample / 8) * @channels
@@ -126,7 +137,7 @@ module Synthesize
         
           
       header_data = header.pack("A4VA4A4VvvVVvvA4V")
-      wav_data = waveform.pack("s*")
+      wav_data = wave_table.pack("s*")
       
       return header_data + wav_data
     end
