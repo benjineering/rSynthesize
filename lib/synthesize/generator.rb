@@ -26,7 +26,7 @@ module Synthesize
     def sine
       phase = 0
       step = (TWO_PI * @frequency).fdiv(@sample_rate)
-      @wave_table = Array.new(@sample_count)
+      @wave_table = WaveTable.new(@sample_count)
 
       @wave_table.each_index do |i|
         @wave_table[i] = @amplitude * Math.sin(phase)        
@@ -42,7 +42,7 @@ module Synthesize
     def square
       phase = 0
       step = (TWO_PI * @frequency).fdiv(@sample_rate)
-      @wave_table = Array.new(@sample_count)
+      @wave_table = WaveTable.new(@sample_count)
 
       @wave_table.each_index do |i|
         @wave_table[i] = phase < Math::PI ? @amplitude : -@amplitude        
@@ -56,7 +56,7 @@ module Synthesize
     def sawtooth
       phase = 0
       step = (TWO_PI * @frequency).fdiv(@sample_rate)
-      @wave_table = Array.new(@sample_count)
+      @wave_table = WaveTable.new(@sample_count)
 
       @wave_table.each_index do |i|
         @wave_table[i] = @amplitude - (@amplitude.fdiv(Math::PI)) * phase        
@@ -70,7 +70,7 @@ module Synthesize
     def triangle
       phase = 0
       step = (TWO_PI * @frequency).fdiv(@sample_rate)
-      @wave_table = Array.new(@sample_count)
+      @wave_table = WaveTable.new(@sample_count)
 
       @wave_table.each_index do |i|
         if phase < Math::PI
@@ -97,7 +97,7 @@ module Synthesize
     end
     
     def silence
-      @wave_table = Array.new(@sample_count)
+      @wave_table = WaveTable.new(@sample_count)
       @wave_table.each_index do |i|
         wave_table[i] = 0
       end

@@ -9,7 +9,11 @@ Gem::Specification.new do |s|
   s.description = %q{Produces basic waveforms, sine, square, sawtooth, triangle. White noise and silence included free!}
   s.email = ["whayman.jw@gmail.com", "8enwilliams@gmail.com"]
   s.extra_rdoc_files = ["CHANGELOG", "LICENSE", "README.md", "lib/synthesize.rb"]
-  s.files = ["CHANGELOG", "LICENSE", "Manifest", "README.md", "Rakefile", "lib/**", "synthesize.gemspec"]
+
+  s.files = Dir.chdir(File.expand_path('..', __FILE__)) do
+    `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
+  end
+
   s.homepage = %q{https://github.com/jwhayman/rSynthesize}
   s.post_install_message = %q{`'~,.,~'`'~,.,~'`'~,.,~'`'~,.,~'}
   s.require_paths = ["lib"]
