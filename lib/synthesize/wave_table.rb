@@ -25,16 +25,10 @@ module Synthesize
     def next(n = 1)
       return nil if n < 1
 
-      start = @pos
-      @pos += n
-      looped_pos = @pos - length
-
-      items =
-      if looped_pos > 0
-        @pos = looped_pos
-        self[start..length] + self[0...looped_pos]
-      else
-        self[start...@pos]
+      items = n.times.collect do
+        @pos += 1
+        @pos = 0 if @pos == length
+        self[@pos]
       end
 
       items.length > 1 ? items : items.first
